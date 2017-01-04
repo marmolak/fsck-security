@@ -8,6 +8,5 @@ if [[ $SERVER == '' ]]; then
 fi
 
 PASS=$(grep $SERVER  <(printf "$CONTENT") | cut -d':' -f2)
-echo $PASS
 sshpass -p$PASS ssh -o StrictHostKeyChecking=no root@$SERVER
 exec $0
