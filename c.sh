@@ -1,11 +1,13 @@
 #!/bin/bash
 
-LIST=$(cut -d':' -f1 servers.txt)
+CONTENT=$(gpg2 --output - --decrypt servers.txt.gpg 2> /dev/null)
+LIST=$(cut -d':' -f1 <(printf "$CONTENT"))
 SERVER=$(zenity --height=400 --list --column Server $LIST)
 if [[ $SERVER == '' ]]; then
     exit
 fi
 
-PASS=$(grep $SERVER servers.txt | cut -d':' -f2)
+PASS=$(grep $SERVER  <(printf "$CONTENT") | cut -d':' -f2)
+echo $PASS
 sshpass -p$PASS ssh -o StrictHostKeyChecking=no root@$SERVER
 exec $0
