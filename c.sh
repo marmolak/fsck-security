@@ -1,4 +1,5 @@
 #!/bin/bash
+# Author: Robin Hack (hack.robin@gmail.com)
 
 if [[ $MPASS == "" ]]; then
     stty_orig=$(stty -g)
@@ -6,6 +7,7 @@ if [[ $MPASS == "" ]]; then
     stty -echo
     read MPASS
     stty $stty_orig
+    echo ""
     MPASS="$MPASS" exec $0
 fi
 
@@ -14,12 +16,15 @@ RET=$?
 if [[ $RET -ne 0 ]]; then
     exit 1
 fi
-LIST=$(cut -d':' -f1 <(printf "$CONTENT"))
-SERVER=$(zenity --height=400 --list --column Server $LIST)
-if [[ $SERVER == '' ]]; then
-    exit
-fi
+LIST=($(cut -d':' -f1 <(printf "$CONTENT")))
 
-PASS=$(grep $SERVER  <(printf "$CONTENT") | cut -d':' -f2)
-sshpass -p$PASS ssh -o StrictHostKeyChecking=no root@$SERVER
-MPASS="$MPASS" exec $0
+SERVER_SEL=($CONTENT)
+select SERVER in "${LIST[@]}"; do
+    case $SERVER in
+        *)
+            PASS=$(grep $SERVER  <(printf "$CONTENT") | cut -d':' -f2)
+            sshpass -p$PASS ssh -o StrictHostKeyChecking=no root@$SERVER
+            MPASS="$MPASS" exec $0
+        esac
+done
+

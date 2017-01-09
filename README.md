@@ -1,2 +1,2 @@
 # fsck-security
-Just small "very secure" tool to store server credentials...
+Small and useful (at least for me) tool which just holds list of servers and passwords.
