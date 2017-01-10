@@ -16,13 +16,17 @@ RET=$?
 if [[ $RET -ne 0 ]]; then
     exit 1
 fi
-LIST=($(cut -d':' -f1 <(printf "$CONTENT")))
+OLD_IFS=$IFS
+IFS=$'\n'
+LIST=($(cut -d':' -f1,2 <(echo "$CONTENT")))
+IFS=$OLD_IFS
 
 SERVER_SEL=($CONTENT)
 select SERVER in "${LIST[@]}"; do
     case $SERVER in
         *)
-            PASS=$(grep $SERVER  <(printf "$CONTENT") | cut -d':' -f2)
+            SERVER=$(echo $SERVER | cut -d':' -f1)
+            PASS=$(grep $SERVER  <(printf "$CONTENT") | cut -d':' -f3)
             sshpass -p$PASS ssh -o StrictHostKeyChecking=no root@$SERVER
             MPASS="$MPASS" exec $0
         esac
