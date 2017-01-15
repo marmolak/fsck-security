@@ -18,17 +18,24 @@ if [[ $RET -ne 0 ]]; then
 fi
 OLD_IFS=$IFS
 IFS=$'\n'
-LIST=($(cut -d':' -f1,2 <(echo "$CONTENT")))
+LIST=('Show content' $(cut -d':' -f1,2 <(echo "$CONTENT")))
 IFS=$OLD_IFS
 
 SERVER_SEL=($CONTENT)
 select SERVER in "${LIST[@]}"; do
     case $SERVER in
+        'Show content')
+            printf "$CONTENT\n"
+            ;;
         *)
             SERVER=$(echo $SERVER | cut -d':' -f1)
+            if [[ -z $SERVER ]]; then
+                echo "\nWrong choice sir!\n"
+                MPASS="$MPASS" exec $0
+            fi
             PASS=$(grep $SERVER  <(printf "$CONTENT") | cut -d':' -f3)
             sshpass -p$PASS ssh -o StrictHostKeyChecking=no root@$SERVER
             MPASS="$MPASS" exec $0
+            ;;
         esac
 done
-
